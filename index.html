@@ -2,17 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Telegram Mini App - Adsgram Integration</title>
-
-  <!-- Open Graph Meta Tags for GitHub & Social Sharing previews -->
-  <meta property="og:title" content="Telegram Mini App" />
-  <meta property="og:description" content="Adsgram integration block ID 40172" />
-  <meta property="og:type" content="website" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Telegram Task Unlocker</title>
 
   <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
   <!-- Adsgram SDK -->
   <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 
@@ -24,128 +18,142 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--tg-theme-bg-color, #0f172a);
-      color: var(--tg-theme-text-color, #f8fafc);
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       padding: 20px;
     }
 
     .card {
-      width: 100%;
       max-width: 400px;
-      background: var(--tg-theme-secondary-bg-color, #1e293b);
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      width: 100%;
       text-align: center;
+      background: #1e293b;
+      padding: 30px 20px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
     }
 
-    h2 {
-      font-size: 1.5rem;
+    h1 {
+      font-size: 1.6rem;
       margin-bottom: 8px;
+      color: #38bdf8;
+    }
+
+    .badge {
+      display: inline-block;
+      background: #334155;
+      color: #38ef7d;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      margin-bottom: 20px;
     }
 
     p {
       font-size: 0.95rem;
       color: #94a3b8;
       margin-bottom: 24px;
+      line-height: 1.5;
     }
 
-    .btn {
+    .btn-ad {
       width: 100%;
-      padding: 14px;
-      font-size: 1rem;
-      font-weight: 600;
+      padding: 14px 20px;
+      background-color: #22c55e;
+      color: #ffffff;
       border: none;
-      border-radius: 12px;
-      background-color: var(--tg-theme-button-color, #2563eb);
-      color: var(--tg-theme-button-text-color, #ffffff);
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 1rem;
       cursor: pointer;
-      transition: background-color 0.2s ease, transform 0.1s ease;
+      transition: transform 0.1s ease, background-color 0.2s ease;
     }
 
-    .btn:active {
+    .btn-ad:active {
       transform: scale(0.98);
     }
 
-    .btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .status-msg {
+    #ad-status {
       margin-top: 16px;
       font-size: 0.9rem;
-      min-height: 20px;
-    }
-
-    .success {
-      color: #22c55e;
-    }
-
-    .error {
-      color: #ef4444;
+      color: #cbd5e1;
     }
   </style>
 </head>
 <body>
 
   <div class="card">
-    <h2>Watch Ad & Earn</h2>
-    <p>Watch a short video ad to collect your reward.</p>
+    <h1>Content Unlocker</h1>
+    <div id="param-badge" class="badge">Code: Default</div>
+    <p>Complete the task by watching an ad to unlock your link.</p>
     
-    <button id="adBtn" class="btn" onclick="triggerAd()">Watch Ad</button>
-    
-    <div id="status" class="status-msg"></div>
+    <button class="btn-ad" onclick="triggerAd()">Watch Ad to Unlock</button>
+
+    <div id="ad-status"></div>
   </div>
 
   <script>
-    // Initialize Telegram WebApp SDK
+    // Latest Adsgram Block ID
+    const BLOCK_ID = "40172"; 
+    let AdController;
+    let startParam = "None";
+
+    // Initialize Telegram WebApp & read start parameter (e.g. AAA2)
     if (window.Telegram && window.Telegram.WebApp) {
       window.Telegram.WebApp.ready();
       window.Telegram.WebApp.expand();
+
+      // Extract parameter passed via startapp (e.g., ?startapp=AAA2)
+      const tgParam = window.Telegram.WebApp.initDataUnsafe?.start_param;
+      if (tgParam) {
+        startParam = tgParam;
+      }
     }
 
-    // Initialize Adsgram with Block ID 40172
-    const AdController = window.Adsgram ? window.Adsgram.init({ blockId: "40172" }) : null;
+    // Display the parameter on UI
+    document.getElementById("param-badge").innerText = `Task ID: ${startParam}`;
+
+    function initAdsgram() {
+      if (window.Adsgram) {
+        AdController = window.Adsgram.init({ blockId: BLOCK_ID });
+      }
+    }
 
     function triggerAd() {
-      const btn = document.getElementById('adBtn');
-      const status = document.getElementById('status');
+      const statusElement = document.getElementById("ad-status");
+
+      if (!AdController) initAdsgram();
 
       if (!AdController) {
-        status.className = 'status-msg error';
-        status.innerText = 'Adsgram SDK failed to load.';
+        statusElement.innerText = "Error: Adsgram SDK failed to initialize.";
+        statusElement.style.color = "#ef4444";
         return;
       }
 
-      btn.disabled = true;
-      status.className = 'status-msg';
-      status.innerText = 'Loading ad...';
+      statusElement.innerText = "Loading ad...";
+      statusElement.style.color = "#cbd5e1";
 
-      AdController.show().then((result) => {
-        // User completed watching the ad
-        status.className = 'status-msg success';
-        status.innerText = '✅ Reward granted!';
-        console.log('Ad completed:', result);
-      }).catch((error) => {
-        // Ad skipped or error occurred
-        status.className = 'status-msg error';
-        if (error && error.error) {
-          status.innerText = '⚠️ Ad closed early or failed to load.';
-        } else {
-          status.innerText = '⚠️ No ads available currently.';
-        }
-        console.error('Ad Error:', error);
-      }).finally(() => {
-        btn.disabled = false;
-      });
+      AdController.show()
+        .then((result) => {
+          console.log("Adsgram Success:", result);
+          statusElement.innerText = `Success! Task (${startParam}) verified.`;
+          statusElement.style.color = "#22c55e";
+        })
+        .catch((error) => {
+          console.error("Adsgram Error:", error);
+          statusElement.innerText = "Ad was skipped or failed to load. Try again!";
+          statusElement.style.color = "#ef4444";
+        });
     }
-  </script>
 
+    window.addEventListener("DOMContentLoaded", initAdsgram);
+  </script>
 </body>
 </html>
