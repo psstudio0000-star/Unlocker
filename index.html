@@ -2,25 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Unlocker Mini App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Telegram Mini App - Adsgram Integration</title>
 
-  <!-- Telegram Web App SDK -->
+  <!-- Open Graph Meta Tags for GitHub & Social Sharing previews -->
+  <meta property="og:title" content="Telegram Mini App" />
+  <meta property="og:description" content="Adsgram integration block ID 40172" />
+  <meta property="og:type" content="website" />
+
+  <!-- Telegram WebApp SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <!-- Adsgram SDK -->
   <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 
   <style>
-    :root {
-      --bg-color: #0b0e14;
-      --card-bg: #151a23;
-      --text-color: #ffffff;
-      --accent-blue: #0088cc;
-      --border-color: #262d3a;
-      --subtext: #8d96a0;
-    }
-
     * {
       box-sizing: border-box;
       margin: 0;
@@ -28,229 +24,128 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-color);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--tg-theme-bg-color, #0f172a);
+      color: var(--tg-theme-text-color, #f8fafc);
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      padding: 16px;
+      padding: 20px;
     }
 
     .card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-color);
+      width: 100%;
+      max-width: 400px;
+      background: var(--tg-theme-secondary-bg-color, #1e293b);
       border-radius: 16px;
-      padding: 24px 20px;
-      width: 100%;
-      max-width: 380px;
+      padding: 24px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
       text-align: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     }
 
-    .title {
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      margin-bottom: 20px;
-      text-transform: uppercase;
+    h2 {
+      font-size: 1.5rem;
+      margin-bottom: 8px;
     }
 
-    .progress-bar-bg {
-      background-color: #212836;
-      border-radius: 10px;
-      height: 12px;
-      width: 100%;
-      overflow: hidden;
-      margin-bottom: 10px;
-    }
-
-    .progress-bar-fill {
-      background-color: var(--accent-blue);
-      height: 100%;
-      width: 0%;
-      transition: width 0.3s ease;
-    }
-
-    .progress-stats {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      color: var(--subtext);
+    p {
+      font-size: 0.95rem;
+      color: #94a3b8;
       margin-bottom: 24px;
-      font-weight: 600;
     }
 
     .btn {
       width: 100%;
       padding: 14px;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 700;
+      font-size: 1rem;
+      font-weight: 600;
       border: none;
+      border-radius: 12px;
+      background-color: var(--tg-theme-button-color, #2563eb);
+      color: var(--tg-theme-button-text-color, #ffffff);
       cursor: pointer;
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      transition: background 0.2s;
+      transition: background-color 0.2s ease, transform 0.1s ease;
     }
 
-    .btn-blue {
-      background-color: var(--accent-blue);
-      color: #ffffff;
+    .btn:active {
+      transform: scale(0.98);
     }
 
-    .btn-dark {
-      background-color: #212836;
-      color: #ffffff;
-      border: 1px solid var(--border-color);
-    }
-
-    .btn-disabled {
+    .btn:disabled {
       opacity: 0.6;
       cursor: not-allowed;
     }
 
     .status-msg {
-      font-size: 13px;
-      color: #f85149;
-      margin-top: 10px;
-      min-height: 18px;
-    }
-
-    .unlocked-content {
-      display: none;
       margin-top: 16px;
-      padding: 12px;
-      background-color: #1c2533;
-      border-radius: 8px;
-      border: 1px solid #0088cc;
+      font-size: 0.9rem;
+      min-height: 20px;
     }
 
-    .unlocked-content a {
-      color: #38bdf8;
-      font-weight: bold;
-      text-decoration: none;
+    .success {
+      color: #22c55e;
+    }
+
+    .error {
+      color: #ef4444;
     }
   </style>
 </head>
 <body>
 
   <div class="card">
-    <h2 class="title" id="pageTitle">CONTENT IS LOCKED</h2>
-
-    <div class="progress-bar-bg">
-      <div class="progress-bar-fill" id="progressFill"></div>
-    </div>
-
-    <div class="progress-stats">
-      <span id="progressPercent">0% Completed</span>
-      <span id="progressTasks">0 / 5 Tasks</span>
-    </div>
-
-    <button class="btn btn-blue" id="shareBtn">SHARE WITH FRIENDS</button>
-    <button class="btn btn-dark" id="unlockBtn">UNLOCK VIDEOS (<span id="taskCount">0</span>/5)</button>
-
-    <div class="status-msg" id="statusMsg">Connecting to Adsgram...</div>
-
-    <!-- Hidden Area that shows when 5/5 tasks are complete -->
-    <div class="unlocked-content" id="unlockedContent">
-      <p style="margin-bottom: 8px; font-weight: bold; color: #4ade80;">🎉 Content Unlocked!</p>
-      <a href="YOUR_FINAL_LINK_HERE" id="targetLink" target="_blank">Click Here to Access Link</a>
-    </div>
+    <h2>Watch Ad & Earn</h2>
+    <p>Watch a short video ad to collect your reward.</p>
+    
+    <button id="adBtn" class="btn" onclick="triggerAd()">Watch Ad</button>
+    
+    <div id="status" class="status-msg"></div>
   </div>
 
   <script>
-    const tg = window.Telegram?.WebApp;
-    if (tg) {
-      tg.ready();
-      tg.expand();
+    // Initialize Telegram WebApp SDK
+    if (window.Telegram && window.Telegram.WebApp) {
+      window.Telegram.WebApp.ready();
+      window.Telegram.WebApp.expand();
     }
 
-    let adController = null;
-    let completedTasks = 0;
-    const totalTasks = 5;
+    // Initialize Adsgram with Block ID 40172
+    const AdController = window.Adsgram ? window.Adsgram.init({ blockId: "40172" }) : null;
 
-    const statusMsg = document.getElementById('statusMsg');
-    const unlockBtn = document.getElementById('unlockBtn');
-    const shareBtn = document.getElementById('shareBtn');
-    const taskCount = document.getElementById('taskCount');
-    const progressFill = document.getElementById('progressFill');
-    const progressPercent = document.getElementById('progressPercent');
-    const progressTasks = document.getElementById('progressTasks');
-    const unlockedContent = document.getElementById('unlockedContent');
+    function triggerAd() {
+      const btn = document.getElementById('adBtn');
+      const status = document.getElementById('status');
 
-    // Initialize Adsgram Block 40102
-    function initAdsgram(retries = 10) {
-      if (window.Adsgram) {
-        try {
-          adController = window.Adsgram.init({ blockId: "40102" });
-          statusMsg.innerText = ""; 
-        } catch (e) {
-          console.error("Adsgram init error:", e);
-          statusMsg.innerText = "Error loading ad network.";
+      if (!AdController) {
+        status.className = 'status-msg error';
+        status.innerText = 'Adsgram SDK failed to load.';
+        return;
+      }
+
+      btn.disabled = true;
+      status.className = 'status-msg';
+      status.innerText = 'Loading ad...';
+
+      AdController.show().then((result) => {
+        // User completed watching the ad
+        status.className = 'status-msg success';
+        status.innerText = '✅ Reward granted!';
+        console.log('Ad completed:', result);
+      }).catch((error) => {
+        // Ad skipped or error occurred
+        status.className = 'status-msg error';
+        if (error && error.error) {
+          status.innerText = '⚠️ Ad closed early or failed to load.';
+        } else {
+          status.innerText = '⚠️ No ads available currently.';
         }
-      } else if (retries > 0) {
-        setTimeout(() => initAdsgram(retries - 1), 300);
-      } else {
-        statusMsg.innerText = "Failed to load Adsgram SDK. Please reopen app.";
-      }
-    }
-
-    window.addEventListener('load', () => initAdsgram());
-
-    // Share Button Logic
-    shareBtn.addEventListener('click', () => {
-      const shareUrl = `https://t.me/share/url?url=${encodeURIComponent('Check out this bot to unlock content!')}`;
-      if (tg && tg.openTelegramLink) {
-        tg.openTelegramLink(shareUrl);
-      } else {
-        window.open(shareUrl, '_blank');
-      }
-    });
-
-    // Unlock Button (Ad Trigger) Logic
-    unlockBtn.addEventListener('click', async () => {
-      if (completedTasks >= totalTasks) {
-        return;
-      }
-
-      if (!adController) {
-        statusMsg.innerText = "Adsgram not ready yet. Try again shortly.";
-        initAdsgram();
-        return;
-      }
-
-      statusMsg.innerText = ""; 
-
-      try {
-        // Show Adsgram Rewarded Ad
-        await adController.show();
-        
-        // Count task if ad completed
-        completedTasks++;
-        updateProgress();
-      } catch (error) {
-        console.error("Ad closed or failed:", error);
-        statusMsg.innerText = "You must watch the full ad to complete the task.";
-      }
-    });
-
-    function updateProgress() {
-      const percentage = Math.round((completedTasks / totalTasks) * 100);
-      progressFill.style.width = percentage + "%";
-      progressPercent.innerText = percentage + "% Completed";
-      progressTasks.innerText = `${completedTasks} / ${totalTasks} Tasks`;
-      taskCount.innerText = completedTasks;
-
-      if (completedTasks >= totalTasks) {
-        unlockBtn.innerText = "UNLOCKED!";
-        unlockBtn.classList.add('btn-disabled');
-        unlockBtn.style.backgroundColor = "#22c55e";
-        unlockedContent.style.display = "block";
-      }
+        console.error('Ad Error:', error);
+      }).finally(() => {
+        btn.disabled = false;
+      });
     }
   </script>
+
 </body>
 </html>
