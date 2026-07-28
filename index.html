@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Telegram Mini App</title>
+  <title>Unlocker Mini App</title>
 
   <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -13,11 +13,11 @@
 
   <style>
     :root {
-      --bg-color: var(--tg-theme-bg-color, #0f172a);
-      --text-color: var(--tg-theme-text-color, #f8fafc);
-      --card-bg: var(--tg-theme-secondary-bg-color, #1e293b);
-      --btn-bg: var(--tg-theme-button-color, #3b82f6);
-      --btn-text: var(--tg-theme-button-text-color, #ffffff);
+      --bg-color: #0d1117;
+      --card-bg: #161b22;
+      --text-color: #ffffff;
+      --btn-blue: #0088cc;
+      --btn-dark: #21262d;
     }
 
     * {
@@ -27,117 +27,190 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: var(--bg-color);
       color: var(--text-color);
-      padding: 16px;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
       min-height: 100vh;
-    }
-
-    .container {
-      width: 100%;
-      max-width: 480px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    /* Ad Trigger Section */
-    .ad-card {
-      background-color: var(--card-bg);
-      border-radius: 12px;
       padding: 16px;
-      text-align: center;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 
-    .ad-btn {
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      padding: 24px 20px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+
+    .progress-bar-bg {
+      background-color: #21262d;
+      border-radius: 10px;
+      height: 10px;
+      width: 100%;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .progress-bar-fill {
+      background-color: #3b82f6;
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    .progress-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: #8b949e;
+      margin-bottom: 24px;
+    }
+
+    .btn {
       width: 100%;
       padding: 14px;
-      margin-top: 10px;
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--btn-text);
-      background-color: var(--btn-bg);
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
       border: none;
-      border-radius: 8px;
       cursor: pointer;
-      transition: opacity 0.2s ease;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    .ad-btn:active {
-      opacity: 0.8;
+    .btn-blue {
+      background-color: var(--btn-blue);
+      color: #ffffff;
     }
 
-    /* Main Content Area */
-    .content-area {
-      background-color: var(--card-bg);
-      border-radius: 12px;
-      padding: 16px;
+    .btn-dark {
+      background-color: var(--btn-dark);
+      color: #ffffff;
+      border: 1px solid #30363d;
+    }
+
+    .status-msg {
+      font-size: 13px;
+      color: #f85149;
+      margin-top: 10px;
+      min-height: 18px;
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
+  <div class="card">
+    <h2 class="title">HIDDEN CAM IS LOCKED</h2>
 
-    <!-- ADSGRAM AD SECTION -->
-    <div class="ad-card">
-      <h3>Watch Ad</h3>
-      <p style="font-size: 14px; opacity: 0.8; margin-top: 4px;">Click below to load and view the advertisement.</p>
-      <button class="ad-btn" id="showAdBtn">Show Ad</button>
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progressFill"></div>
     </div>
 
-    <!-- ======================================================= -->
-    <!-- PASTE YOUR CONTENT HERE (Movies, links, text, etc.)     -->
-    <!-- ======================================================= -->
-    <div class="content-area">
-      <h2>Welcome to App</h2>
-      <p style="margin-top: 8px;">Paste your content, links, or media here.</p>
+    <div class="progress-stats">
+      <span id="progressPercent">0% Completed</span>
+      <span id="progressTasks">0 / 5 Tasks</span>
     </div>
-    <!-- ======================================================= -->
 
+    <button class="btn btn-blue" id="shareBtn">SHARE</button>
+    <button class="btn btn-dark" id="unlockBtn">UNLOCK VIDEOS (<span id="taskCount">0</span>/5)</button>
+
+    <div class="status-msg" id="statusMsg"></div>
   </div>
 
   <script>
-    // 1. Initialize Telegram WebApp
+    // Initialize Telegram WebApp
     const tg = window.Telegram?.WebApp;
     if (tg) {
       tg.ready();
       tg.expand();
     }
 
-    // 2. Initialize Adsgram with Block ID 40102
-    const AdController = window.Adsgram?.init({
-      blockId: "40102"
-    });
+    let adController = null;
+    let completedTasks = 0;
+    const totalTasks = 5;
 
-    // 3. Attach click handler to trigger the ad
-    const showAdBtn = document.getElementById("showAdBtn");
+    const statusMsg = document.getElementById('statusMsg');
+    const unlockBtn = document.getElementById('unlockBtn');
+    const taskCount = document.getElementById('taskCount');
+    const progressFill = document.getElementById('progressFill');
+    const progressPercent = document.getElementById('progressPercent');
+    const progressTasks = document.getElementById('progressTasks');
 
-    showAdBtn.addEventListener("click", async () => {
-      if (!AdController) {
-        alert("Adsgram SDK is still loading or failed to initialize.");
+    // Safe Adsgram Initialization
+    function initAdsgram() {
+      if (window.Adsgram) {
+        try {
+          adController = window.Adsgram.init({ blockId: "40102" });
+          statusMsg.innerText = ""; // Clear loading message on success
+        } catch (e) {
+          console.error("Adsgram init error:", e);
+          statusMsg.innerText = "Error initializing Adsgram.";
+        }
+      } else {
+        // Retry if script isn't fully ready yet
+        setTimeout(initAdsgram, 500);
+      }
+    }
+
+    // Run initialization on load
+    window.addEventListener('DOMContentLoaded', initAdsgram);
+
+    // Unlock button click handler
+    unlockBtn.addEventListener('click', async () => {
+      if (completedTasks >= totalTasks) {
+        alert("All tasks completed! Unlocking content...");
         return;
       }
 
+      if (!adController) {
+        statusMsg.innerText = "Adsgram SDK loading... try again shortly.";
+        // Attempt re-init
+        initAdsgram();
+        return;
+      }
+
+      statusMsg.innerText = ""; // Clear text
+
       try {
-        // Show rewarded ad block
-        const result = await AdController.show();
-        console.log("Ad completed:", result);
+        // Show the ad
+        await adController.show();
         
-        // Action after user successfully watches the ad
-        alert("Ad completed successfully!");
+        // On ad success:
+        completedTasks++;
+        updateProgress();
 
       } catch (error) {
-        // Triggered if the ad was closed early, failed to load, or skipped
-        console.error("Ad incomplete or error:", error);
-        alert("Ad was closed or could not be displayed.");
+        console.error("Ad failed or skipped:", error);
+        statusMsg.innerText = "Ad was not completed or unavailable. Try again.";
       }
     });
+
+    function updateProgress() {
+      const percentage = Math.round((completedTasks / totalTasks) * 100);
+      progressFill.style.width = percentage + "%";
+      progressPercent.innerText = percentage + "% Completed";
+      progressTasks.innerText = `${completedTasks} / ${totalTasks} Tasks`;
+      taskCount.innerText = completedTasks;
+
+      if (completedTasks >= totalTasks) {
+        unlockBtn.innerText = "ACCESS UNLOCKED!";
+        unlockBtn.style.backgroundColor = "#238636";
+      }
+    }
   </script>
 
 </body>
