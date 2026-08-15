@@ -120,7 +120,8 @@
 
             try {
                 adBtn.disabled = true;
-                const AdController = window.Adsgram.init({ blockId: "43061" });
+                // Active Block ID
+                const AdController = window.Adsgram.init({ blockId: "42965" });
                 
                 const result = await AdController.show();
                 showStatus("Reward Claimed Successfully! 🎉", true);
