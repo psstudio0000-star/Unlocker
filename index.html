@@ -1,504 +1,386 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Spin & Win - Telegram Mini App</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>HD Premium Video Player</title>
+
+  <!-- Telegram Web App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <!-- Adsgram SDK -->
+  <script id="adsgram-script" src="https://sad.adsgram.ai/js/sad.min.js"></script>
+
   <style>
     * {
+      box-sizing: border-box;
       margin: 0;
       padding: 0;
-      box-sizing: border-box;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      font-family: -apple-system, 'Segoe UI', 'Poppins', system-ui, sans-serif;
-      min-height: 100vh;
+      background-color: #090d16;
+      color: #ffffff;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 12px;
-      overflow-x: hidden;
-    }
-
-    /* Main App Container */
-    .app-container {
-      max-width: 450px;
-      width: 100%;
-      margin: 0 auto;
-      background: linear-gradient(180deg, #0f0f23 0%, #1a1a3e 100%);
-      border-radius: 32px;
-      overflow: hidden;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
-      position: relative;
-    }
-
-    /* Header Stats */
-    .stats-header {
-      background: rgba(0,0,0,0.4);
-      padding: 20px 20px 16px;
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid rgba(255,215,0,0.2);
-    }
-
-    .balance-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 12px;
-    }
-
-    .coin-balance {
-      background: linear-gradient(135deg, #ffd700, #ffb347);
-      padding: 8px 18px;
-      border-radius: 40px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: bold;
-      font-size: 1.4rem;
-      color: #2c1810;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-    }
-
-    .coin-balance span:first-child {
-      font-size: 1.6rem;
-    }
-
-    .level-badge {
-      background: rgba(255,255,255,0.15);
-      padding: 6px 14px;
-      border-radius: 40px;
-      font-size: 0.8rem;
-      color: #ffd966;
-      backdrop-filter: blur(4px);
-    }
-
-    /* Daily Streak */
-    .streak-section {
-      background: rgba(255,255,255,0.05);
-      border-radius: 28px;
-      padding: 12px 16px;
-      margin-top: 8px;
-    }
-
-    .streak-title {
-      font-size: 0.7rem;
-      color: #aaa;
-      letter-spacing: 1px;
-      margin-bottom: 10px;
-    }
-
-    .streak-days {
-      display: flex;
-      justify-content: space-between;
-      gap: 6px;
-    }
-
-    .day-card {
-      flex: 1;
-      text-align: center;
-      background: rgba(0,0,0,0.3);
-      padding: 8px 4px;
-      border-radius: 16px;
-      font-size: 0.7rem;
-      color: #ccc;
-      transition: all 0.2s;
-    }
-
-    .day-card.active {
-      background: linear-gradient(135deg, #ffd700, #ff8c00);
-      color: #1a1a2e;
-      font-weight: bold;
-      box-shadow: 0 0 10px rgba(255,215,0,0.5);
-    }
-
-    .day-card.claimed {
-      background: #2e7d32;
-      color: #fff;
-    }
-
-    /* Spin Wheel Section */
-    .spin-section {
-      padding: 24px 20px;
-      text-align: center;
-      background: radial-gradient(circle at 50% 0%, rgba(255,215,0,0.1), transparent);
-    }
-
-    .wheel-container {
-      position: relative;
-      width: 260px;
-      height: 260px;
-      margin: 0 auto 20px;
-    }
-
-    canvas {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,215,0,0.2);
-      transition: transform 0.3s;
-    }
-
-    .spin-btn {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 70px;
-      height: 70px;
-      background: linear-gradient(135deg, #ffd700, #ff8c00);
-      border: none;
-      border-radius: 50%;
-      font-weight: bold;
-      font-size: 1rem;
-      cursor: pointer;
-      box-shadow: 0 6px 0 #b45f1b;
-      transition: 0.05s linear;
-      color: #2c1810;
-      font-weight: 800;
-      z-index: 10;
-    }
-
-    .spin-btn:active {
-      transform: translate(-50%, -50%) scale(0.96);
-      box-shadow: 0 2px 0 #b45f1b;
-    }
-
-    .spin-btn:disabled {
-      opacity: 0.6;
-      transform: translate(-50%, -50%);
-      cursor: not-allowed;
-    }
-
-    /* Mining & Action Buttons */
-    .mining-section {
-      background: rgba(0,0,0,0.3);
-      margin: 8px 20px 20px;
-      border-radius: 32px;
+      min-height: 100vh;
       padding: 16px;
     }
 
-    .mine-btn {
+    .card {
+      background: #121824;
+      border-radius: 20px;
+      padding: 20px;
       width: 100%;
-      background: linear-gradient(135deg, #4caf50, #2e7d32);
-      border: none;
-      padding: 18px;
-      border-radius: 60px;
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: white;
+      max-width: 360px;
+      text-align: center;
+      border: 1px solid #1e293b;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
+    }
+
+    .player-preview {
+      width: 100%;
+      height: 170px;
+      background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.85) 100%), 
+                  url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&auto=format&fit=crop') center/cover;
+      border-radius: 14px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+      border: 1px solid #2a364f;
+      overflow: hidden;
+    }
+
+    .play-icon {
+      width: 54px;
+      height: 54px;
+      background: rgba(255, 59, 48, 0.9);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 20px rgba(255, 59, 48, 0.6);
+      animation: pulse 1.8s infinite;
+    }
+
+    .play-icon::after {
+      content: '';
+      width: 0;
+      height: 0;
+      border-style: solid;
+      border-width: 10px 0 10px 18px;
+      border-color: transparent transparent transparent #ffffff;
+      margin-left: 4px;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.7); }
+      70% { transform: scale(1.05); box-shadow: 0 0 0 14px rgba(255, 59, 48, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); }
+    }
+
+    .video-status-tag {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.75);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      color: #ff4757;
+      border: 1px solid rgba(255, 71, 87, 0.4);
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 12px;
+      gap: 5px;
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      background-color: #ff4757;
+      border-radius: 50%;
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .video-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      color: #f1f5f9;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 18px;
+      background-color: #0b0f17;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 8px;
+      border: 1px solid #1e293b;
+      padding: 2px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #3b82f6, #06b6d4, #10b981);
+      border-radius: 8px;
+      transition: width 0.4s ease-in-out;
+      box-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #94a3b8;
+      margin-bottom: 20px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      letter-spacing: 0.5px;
       cursor: pointer;
-      transition: 0.08s linear;
-      box-shadow: 0 6px 0 #1b5e20;
+      margin-bottom: 12px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-unlock {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #ffffff;
+      box-shadow: 0 4px 18px rgba(37, 99, 235, 0.4);
+      border: 1px solid #3b82f6;
+    }
+
+    .btn-unlock.active {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #ffffff;
+      box-shadow: 0 4px 20px rgba(34, 197, 94, 0.5);
+    }
+
+    .btn-unlock:disabled {
+      opacity: 0.85;
+      cursor: not-allowed;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.88);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      backdrop-filter: blur(6px);
+    }
+
+    .modal-box {
+      background-color: #0f172a;
+      border: 2px solid #22c55e;
+      border-radius: 20px;
+      padding: 28px 20px;
+      width: 85%;
+      max-width: 320px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(34, 197, 94, 0.3);
+    }
+
+    .share-count-text {
+      color: #22c55e;
+      font-size: 20px;
+      font-weight: 800;
       margin-bottom: 12px;
     }
 
-    .mine-btn:active {
-      transform: translateY(2px);
-      box-shadow: 0 3px 0 #1b5e20;
+    .share-instruction {
+      color: #f8fafc;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      line-height: 1.4;
     }
 
-    /* Bottom Navigation */
-    .bottom-nav {
-      display: flex;
-      background: rgba(0,0,0,0.6);
-      backdrop-filter: blur(20px);
-      padding: 8px 16px 20px;
-      justify-content: space-around;
-      border-top: 1px solid rgba(255,215,0,0.2);
-      margin-top: 8px;
-    }
-
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      background: none;
+    .ok-btn {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: #ffffff;
       border: none;
-      color: #aaa;
-      font-size: 0.7rem;
-      padding: 8px 12px;
-      border-radius: 30px;
+      padding: 14px 0;
+      width: 100%;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 800;
       cursor: pointer;
-      transition: 0.1s;
-    }
-
-    .nav-item.active {
-      background: rgba(255,215,0,0.2);
-      color: #ffd700;
-    }
-
-    .nav-item span:first-child {
-      font-size: 1.5rem;
-    }
-
-    /* Ad Button (Rewarded) */
-    .ad-bonus-btn {
-      background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-      border: none;
-      padding: 12px;
-      border-radius: 40px;
-      color: white;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      cursor: pointer;
-      margin-top: 8px;
-      transition: 0.1s;
-    }
-
-    .ad-bonus-btn:active {
-      transform: scale(0.97);
-    }
-
-    /* Pages */
-    .page {
-      display: none;
-    }
-
-    .page.active-page {
-      display: block;
-    }
-
-    /* Info Text */
-    .info-text {
-      text-align: center;
-      font-size: 0.7rem;
-      color: #888;
-      padding: 12px;
-    }
-
-    .reward-notification {
-      position: fixed;
-      bottom: 100px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #ffd700;
-      color: #1a1a2e;
-      padding: 12px 24px;
-      border-radius: 40px;
-      font-weight: bold;
-      z-index: 1000;
-      animation: fadeUp 2s ease forwards;
-      pointer-events: none;
-    }
-
-    @keyframes fadeUp {
-      0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
-      15% { opacity: 1; transform: translateX(-50%) translateY(0); }
-      85% { opacity: 1; transform: translateX(-50%) translateY(0); }
-      100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
     }
   </style>
-  <script src="https://adsgram.ai/js/adsgram.js"></script>
-  <script src="https://telegram.org/js/telegram-web-app.js?56"></script>
 </head>
 <body>
-<div class="app-container" id="app">
-  <!-- Stats Header -->
-  <div class="stats-header">
-    <div class="balance-row">
-      <div class="coin-balance">
-        <span>🪙</span>
-        <span id="balanceAmount">0</span>
-      </div>
-      <div class="level-badge">
-        ⭐ Level 1
-      </div>
+
+  <div class="card">
+    <div class="player-preview">
+      <div class="video-status-tag"><span class="live-dot"></span> LOCKED • 1080p FULL HD</div>
+      <div class="play-icon"></div>
     </div>
-    
-    <!-- Daily Streak -->
-    <div class="streak-section">
-      <div class="streak-title">📅 DAILY REWARD STREAK</div>
-      <div class="streak-days" id="streakContainer">
-        <!-- JS will populate -->
-      </div>
+
+    <div class="video-title">STEP MOM (FULL MOVIE)</div>
+
+    <div class="progress-bar-container">
+      <div id="progress-fill" class="progress-bar-fill"></div>
+    </div>
+
+    <div class="progress-info">
+      <span id="progress-percent">0% Server Decrypted</span>
+      <span id="task-count">0 / 5 Keys</span>
+    </div>
+
+    <button id="unlock-btn" class="btn btn-unlock" onclick="handleUnlockClick()">🔓 DECRYPT PART 1 (0/5)</button>
+  </div>
+
+  <div class="modal-overlay" id="shareModal">
+    <div class="modal-box">
+      <div class="share-count-text">🎉 ACCESS GRANTED!</div>
+      <div class="share-instruction">All 5 Decryption Keys Verified. Click below to stream full video!</div>
+      <button class="ok-btn" onclick="handleModalOkClick()">▶ WATCH NOW FULL HD</button>
     </div>
   </div>
 
-  <!-- MAIN GAME PAGE (Spin + Mine) -->
-  <div id="mainPage" class="page active-page">
-    <div class="spin-section">
-      <div class="wheel-container">
-        <canvas id="wheelCanvas" width="500" height="500"></canvas>
-        <button class="spin-btn" id="spinButton">SPIN</button>
-      </div>
-    </div>
+  <script>
+    let tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
 
-    <div class="mining-section">
-      <button class="mine-btn" id="mineButton">
-        <span>⛏️</span> MINE <span>⛏️</span>
-      </button>
-      <button class="ad-bonus-btn" id="watchAdSpinBtn">
-        <span>📺</span> Watch Ad → +50 SPIN TOKENS
-      </button>
-    </div>
-    <div class="info-text">
-      ✨ Spin to win coins! Mine every 10 seconds. Ads give bonus spins ✨
-    </div>
-  </div>
+    let completedTasks = 0;
+    const totalTasks = 5;
 
-  <!-- EARN PAGE (Referral / Tasks style) -->
-  <div id="earnPage" class="page">
-    <div style="padding: 30px 20px; text-align: center;">
-      <h3 style="color:#ffd700;">💎 EARN MORE</h3>
-      <div style="background: rgba(255,255,255,0.1); border-radius: 28px; padding: 20px; margin-top: 20px;">
-        <button id="earnAdBtn" class="ad-bonus-btn" style="background: #9b59b6; width: 100%; margin-bottom: 12px;">
-          🎁 Watch Ad → +100 COINS
-        </button>
-        <button id="earnSpinAdBtn" class="ad-bonus-btn" style="background: #e67e22; width: 100%;">
-          🎰 Watch Ad → +1 FREE SPIN
-        </button>
-      </div>
-      <div class="info-text" style="margin-top: 30px;">
-        Complete offers, watch rewarded videos for extra rewards
-      </div>
-    </div>
-  </div>
+    // BOT 2 BLOCK ID UPDATED HERE 🎯
+    const ADSGRAM_BLOCK_ID = "42965";
 
-  <!-- WATERDROP / Daily Bonus page -->
-  <div id="waterdropPage" class="page">
-    <div style="padding: 30px 20px; text-align: center;">
-      <h3 style="color:#ffd700;">💧 DAILY WATERDROP</h3>
-      <div style="font-size: 4rem; margin: 30px;">💧</div>
-      <button id="dailyClaimBtn" class="mine-btn" style="background: linear-gradient(135deg, #00b4db, #0083b0);">
-        💧 CLAIM DAILY BONUS
-      </button>
-      <button id="waterdropAdBtn" class="ad-bonus-btn" style="margin-top: 15px;">
-        📺 Watch Ad → Double Daily Reward
-      </button>
-      <div class="info-text" style="margin-top: 20px;">
-        Claim once per day. Ads can double your reward!
-      </div>
-    </div>
-  </div>
+    let isWaiting = false;
 
-  <!-- WALLET Page -->
-  <div id="walletPage" class="page">
-    <div style="padding: 30px 20px; text-align: center;">
-      <h3 style="color:#ffd700;">👛 MY WALLET</h3>
-      <div class="coin-balance" style="justify-content: center; margin: 30px auto; width: fit-content;">
-        <span>🪙</span> <span id="walletBalance">0</span>
-      </div>
-      <div class="info-text">
-        Total earnings from spins, mining, and ads.<br>
-        💡 Watch rewarded ads to boost your balance!
-      </div>
-    </div>
-  </div>
+    // Telegram Channel / Destination Link (Zaroorat ke hisaab se change kar sakte ho)
+    const FINAL_DESTINATION_URL = "https://t.me/+cs76HfenGYI4MWQ1";
 
-  <!-- Bottom Navigation -->
-  <div class="bottom-nav">
-    <button class="nav-item active" data-page="main">
-      <span>🎰</span><span>SPIN</span>
-    </button>
-    <button class="nav-item" data-page="earn">
-      <span>💰</span><span>EARN</span>
-    </button>
-    <button class="nav-item" data-page="waterdrop">
-      <span>💧</span><span>WATERDROP</span>
-    </button>
-    <button class="nav-item" data-page="wallet">
-      <span>👛</span><span>WALLET</span>
-    </button>
-  </div>
-</div>
+    const stepMessages = [
+      "🔓 DECRYPT PART 1 (0/5)",
+      "⚡ UNLOCK HD SERVER (1/5)",
+      "🎥 BUFFER FULL VIDEO (2/5)",
+      "🔑 GENERATE STREAM KEY (3/5)",
+      "🚀 FINAL ACCESS KEY (4/5)"
+    ];
 
-<script>
-  // -------------------- GAME STATE --------------------
-  let balance = 100; // starting coins
-  let spinsAvailable = 3; // free spins
-  let lastMineTime = 0;
-  const MINE_COOLDOWN = 10000; // 10 seconds
-  const MINE_REWARD = 15;
+    function handleUnlockClick() {
+      if (completedTasks >= totalTasks) {
+        showShareModal();
+        return;
+      }
 
-  // Daily streak
-  let streakDays = [false, false, false, false, false, false, false];
-  let lastClaimDate = null;
-  let currentStreakDay = 1;
+      if (isWaiting) return;
+      isWaiting = true;
 
-  // Wheel prizes (coins)
-  const prizes = [5, 10, 20, 50, 100, 200, 500, 15, 25, 75, 150, 8];
-  const segments = 12;
-  let isSpinning = false;
-  let canvas, ctx;
-  let currentAngle = 0;
+      const unlockBtn = document.getElementById('unlock-btn');
+      unlockBtn.disabled = true;
+      unlockBtn.innerText = "⚡ VERIFYING DECRYPTION KEY...";
 
-  // Adsgram Integration
-  const ADSGRAM_BLOCK_ID = "39945";
-  let adsgramInstance = null;
+      executeAdCall();
+    }
 
-  function initAdsgram() {
-    if (typeof Adsgram !== 'undefined') {
-      try {
-        adsgramInstance = Adsgram.init({ blockId: ADSGRAM_BLOCK_ID, debug: false });
-      } catch(e) { 
-        console.warn("Adsgram Init Error:", e); 
+    function executeAdCall() {
+      if (typeof window.Adsgram !== "undefined") {
+        try {
+          const AdController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
+
+          AdController.show()
+            .then((result) => {
+              if (tg && tg.HapticFeedback) {
+                tg.HapticFeedback.notificationOccurred('success');
+              }
+              completedTasks++;
+
+              if (completedTasks >= totalTasks) {
+                isWaiting = false;
+                updateUI();
+                showShareModal();
+              } else {
+                startCoolDownBuffer();
+              }
+            })
+            .catch((error) => {
+              // Silent recovery - error hide karke auto retry buffer
+              startCoolDownBuffer();
+            });
+        } catch (err) {
+          startCoolDownBuffer();
+        }
+      } else {
+        startCoolDownBuffer();
       }
     }
-  }
 
-  // Helper: show notification
-  function showNotification(message, isError = false) {
-    const notif = document.createElement('div');
-    notif.className = 'reward-notification';
-    notif.textContent = message;
-    notif.style.background = isError ? '#e74c3c' : '#ffd700';
-    notif.style.color = '#1a1a2e';
-    document.body.appendChild(notif);
-    setTimeout(() => notif.remove(), 2000);
-  }
+    function startCoolDownBuffer() {
+      const unlockBtn = document.getElementById('unlock-btn');
+      let timeLeft = 3;
 
-  // Update UI balance
-  function updateBalanceUI() {
-    document.getElementById('balanceAmount').innerText = Math.floor(balance);
-    document.getElementById('walletBalance').innerText = Math.floor(balance);
-  }
+      const cooldown = setInterval(() => {
+        unlockBtn.innerText = `⏳ Buffering Next Key (${timeLeft}s)...`;
+        timeLeft--;
 
-  // Add coins safely
-  function addCoins(amount, source = "reward") {
-    balance += amount;
-    updateBalanceUI();
-    showNotification(`+${amount} 🪙 from ${source}!`);
-    saveGameData();
-  }
-
-  // Spin logic
-  function performSpin(isFree = true) {
-    if (isSpinning) return false;
-    if (!isFree && spinsAvailable <= 0) {
-      showNotification("No spins left! Watch an ad for +50 spins!", true);
-      return false;
+        if (timeLeft < 0) {
+          clearInterval(cooldown);
+          isWaiting = false;
+          updateUI();
+        }
+      }, 1000);
     }
-    if (!isFree) spinsAvailable--;
-    
-    isSpinning = true;
-    const spinButton = document.getElementById('spinButton');
-    spinButton.disabled = true;
-    
-    const randomSegment = Math.floor(Math.random() * segments);
-    const prizeValue = prizes[randomSegment];
-    const anglePerSegment = (Math.PI * 2) / segments;
-    const targetSegmentAngle = randomSegment * anglePerSegment;
-    const currentRotation = currentAngle % (Math.PI * 2);
-    let delta = (targetSegmentAngle - currentRotation);
-    const fullSpins = 8 * Math.PI * 2;
-    const finalDelta = delta + fullSpins;
-    
-    const startAngle = currentAngle;
-    const startTime = performance.now();
-    const duration = 2000;
-    
-    function animateSpin(now) {
-      const elapsed = now - 
+
+    function updateUI() {
+      if (completedTasks > totalTasks) completedTasks = totalTasks;
+
+      const percent = Math.round((completedTasks / totalTasks) * 100);
+      document.getElementById('progress-percent').innerText = `${percent}% Server Decrypted`;
+      document.getElementById('task-count').innerText = `${completedTasks} / ${totalTasks} Keys`;
+      document.getElementById('progress-fill').style.width = `${percent}%`;
+
+      const unlockBtn = document.getElementById('unlock-btn');
+      unlockBtn.disabled = false;
+
+      if (completedTasks >= totalTasks) {
+        unlockBtn.classList.add('active');
+        unlockBtn.innerText = `🎉 PLAY FULL VIDEO NOW`;
+      } else {
+        unlockBtn.innerText = stepMessages[completedTasks];
+      }
+    }
+
+    function showShareModal() {
+      document.getElementById('shareModal').style.display = 'flex';
+    }
+
+    function handleModalOkClick() {
+      document.getElementById('shareModal').style.display = 'none';
+      if (tg && tg.openTelegramLink && FINAL_DESTINATION_URL.includes("t.me")) {
+        tg.openTelegramLink(FINAL_DESTINATION_URL);
+      } else {
+        window.location.href = FINAL_DESTINATION_URL;
+      }
+    }
+  </script>
+
+</body>
+</html>
