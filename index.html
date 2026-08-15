@@ -4,379 +4,60 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>HD Premium Video Player</title>
-
-  <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <!-- Adsgram SDK -->
   <script id="adsgram-script" src="https://sad.adsgram.ai/js/sad.min.js"></script>
 
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-    }
-
-    body {
-      background-color: #090d16;
-      color: #ffffff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 16px;
-    }
-
-    .card {
-      background: #121824;
-      border-radius: 20px;
-      padding: 20px;
-      width: 100%;
-      max-width: 360px;
-      text-align: center;
-      border: 1px solid #1e293b;
-      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
-    }
-
-    .player-preview {
-      width: 100%;
-      height: 170px;
-      background: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.85) 100%), 
-                  url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500&auto=format&fit=crop') center/cover;
-      border-radius: 14px;
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 20px;
-      border: 1px solid #2a364f;
-      overflow: hidden;
-    }
-
-    .play-icon {
-      width: 54px;
-      height: 54px;
-      background: rgba(255, 59, 48, 0.9);
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-shadow: 0 0 20px rgba(255, 59, 48, 0.6);
-      animation: pulse 1.8s infinite;
-    }
-
-    .play-icon::after {
-      content: '';
-      width: 0;
-      height: 0;
-      border-style: solid;
-      border-width: 10px 0 10px 18px;
-      border-color: transparent transparent transparent #ffffff;
-      margin-left: 4px;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.7); }
-      70% { transform: scale(1.05); box-shadow: 0 0 0 14px rgba(255, 59, 48, 0); }
-      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); }
-    }
-
-    .video-status-tag {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      background: rgba(0, 0, 0, 0.75);
-      font-size: 11px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 20px;
-      color: #ff4757;
-      border: 1px solid rgba(255, 71, 87, 0.4);
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .live-dot {
-      width: 6px;
-      height: 6px;
-      background-color: #ff4757;
-      border-radius: 50%;
-      animation: blink 1s infinite;
-    }
-
-    @keyframes blink { 50% { opacity: 0; } }
-
-    .video-title {
-      font-size: 1.1rem;
-      font-weight: 800;
-      margin-bottom: 16px;
-      color: #f1f5f9;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .progress-bar-container {
-      width: 100%;
-      height: 18px;
-      background-color: #0b0f17;
-      border-radius: 10px;
-      overflow: hidden;
-      margin-bottom: 8px;
-      border: 1px solid #1e293b;
-      padding: 2px;
-    }
-
-    .progress-bar-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #3b82f6, #06b6d4, #10b981);
-      border-radius: 8px;
-      transition: width 0.4s ease-in-out;
-      box-shadow: 0 0 12px rgba(6, 182, 212, 0.6);
-    }
-
-    .progress-info {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: #94a3b8;
-      margin-bottom: 20px;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 16px;
-      border: none;
-      border-radius: 14px;
-      font-weight: 800;
-      font-size: 0.95rem;
-      letter-spacing: 0.5px;
-      cursor: pointer;
-      margin-bottom: 12px;
-      transition: all 0.2s ease;
-    }
-
-    .btn-unlock {
-      background: linear-gradient(135deg, #2563eb, #1d4ed8);
-      color: #ffffff;
-      box-shadow: 0 4px 18px rgba(37, 99, 235, 0.4);
-      border: 1px solid #3b82f6;
-    }
-
-    .btn-unlock.active {
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      color: #ffffff;
-      box-shadow: 0 4px 20px rgba(34, 197, 94, 0.5);
-    }
-
-    .btn-unlock:disabled {
-      opacity: 0.85;
-      cursor: not-allowed;
-    }
-
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.88);
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      backdrop-filter: blur(6px);
-    }
-
-    .modal-box {
-      background-color: #0f172a;
-      border: 2px solid #22c55e;
-      border-radius: 20px;
-      padding: 28px 20px;
-      width: 85%;
-      max-width: 320px;
-      text-align: center;
-      box-shadow: 0 0 30px rgba(34, 197, 94, 0.3);
-    }
-
-    .share-count-text {
-      color: #22c55e;
-      font-size: 20px;
-      font-weight: 800;
-      margin-bottom: 12px;
-    }
-
-    .share-instruction {
-      color: #f8fafc;
-      font-size: 16px;
-      font-weight: 700;
-      margin-bottom: 20px;
-      line-height: 1.4;
-    }
-
-    .ok-btn {
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      color: #ffffff;
-      border: none;
-      padding: 14px 0;
-      width: 100%;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 800;
-      cursor: pointer;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { background-color: #090d16; color: #ffffff; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 16px; }
+    .card { background: #121824; border-radius: 20px; padding: 20px; width: 100%; max-width: 360px; text-align: center; border: 1px solid #1e293b; }
+    .btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-weight: 800; font-size: 0.95rem; cursor: pointer; margin-top: 15px; background: #2563eb; color: #fff; }
+    .status-box { margin-top: 15px; font-size: 13px; color: #94a3b8; background: #0b0f17; padding: 10px; border-radius: 8px; border: 1px solid #1e293b; }
   </style>
 </head>
 <body>
 
   <div class="card">
-    <div class="player-preview">
-      <div class="video-status-tag"><span class="live-dot"></span> LOCKED • 1080p FULL HD</div>
-      <div class="play-icon"></div>
-    </div>
-
-    <div class="video-title">STEP MOM (FULL MOVIE)</div>
-
-    <div class="progress-bar-container">
-      <div id="progress-fill" class="progress-bar-fill"></div>
-    </div>
-
-    <div class="progress-info">
-      <span id="progress-percent">0% Server Decrypted</span>
-      <span id="task-count">0 / 5 Keys</span>
-    </div>
-
-    <button id="unlock-btn" class="btn btn-unlock" onclick="handleUnlockClick()">🔓 DECRYPT PART 1 (0/5)</button>
-  </div>
-
-  <div class="modal-overlay" id="shareModal">
-    <div class="modal-box">
-      <div class="share-count-text">🎉 ACCESS GRANTED!</div>
-      <div class="share-instruction">All 5 Decryption Keys Verified. Click below to stream full video!</div>
-      <button class="ok-btn" onclick="handleModalOkClick()">▶ WATCH NOW FULL HD</button>
-    </div>
+    <h2>HD VIDEO UNLOCK</h2>
+    <div id="status" class="status-box">Status: Ready to Test</div>
+    <button id="unlock-btn" class="btn" onclick="triggerAd()">⚡ TEST AD LOAD</button>
   </div>
 
   <script>
     let tg = window.Telegram?.WebApp;
-    if (tg) {
-      tg.ready();
-      tg.expand();
-    }
+    if (tg) { tg.ready(); tg.expand(); }
 
-    let completedTasks = 0;
-    const totalTasks = 5;
     const ADSGRAM_BLOCK_ID = "42965";
-    let isWaiting = false;
 
-    const FINAL_DESTINATION_URL = "https://t.me/+cs76HfenGYI4MWQ1";
+    function triggerAd() {
+      const statusEl = document.getElementById('status');
+      statusEl.innerText = "Status: Initializing Adsgram...";
 
-    const stepMessages = [
-      "🔓 DECRYPT PART 1 (0/5)",
-      "⚡ UNLOCK HD SERVER (1/5)",
-      "🎥 BUFFER FULL VIDEO (2/5)",
-      "🔑 GENERATE STREAM KEY (3/5)",
-      "🚀 FINAL ACCESS KEY (4/5)"
-    ];
-
-    function handleUnlockClick() {
-      if (completedTasks >= totalTasks) {
-        showShareModal();
+      if (typeof window.Adsgram === "undefined") {
+        alert("Adsgram SDK load nahi hua! Internet/Script Block check karein.");
+        statusEl.innerText = "Status: SDK Script Failed";
         return;
       }
 
-      if (isWaiting) return;
-      isWaiting = true;
-
-      const unlockBtn = document.getElementById('unlock-btn');
-      unlockBtn.disabled = true;
-      unlockBtn.innerText = "⚡ VERIFYING DECRYPTION KEY...";
-
-      executeAdCall();
-    }
-
-    function executeAdCall() {
-      if (typeof window.Adsgram !== "undefined") {
-        try {
-          const AdController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID });
-
-          AdController.show()
-            .then((result) => {
-              if (tg && tg.HapticFeedback) {
-                tg.HapticFeedback.notificationOccurred('success');
-              }
-              completedTasks++;
-              startCoolDownBuffer();
-            })
-            .catch((error) => {
-              // Adsgram Error / No-Fill hone par silent auto-bypass (task count ho jayega)
-              completedTasks++;
-              startCoolDownBuffer();
-            });
-        } catch (err) {
-          completedTasks++;
-          startCoolDownBuffer();
-        }
-      } else {
-        completedTasks++;
-        startCoolDownBuffer();
-      }
-    }
-
-    function startCoolDownBuffer() {
-      const unlockBtn = document.getElementById('unlock-btn');
-      let timeLeft = 3;
-
-      const cooldown = setInterval(() => {
-        unlockBtn.innerText = `⏳ Decrypting Server (${timeLeft}s)...`;
-        timeLeft--;
-
-        if (timeLeft < 0) {
-          clearInterval(cooldown);
-          isWaiting = false;
-          updateUI();
-
-          if (completedTasks >= totalTasks) {
-            showShareModal();
-          }
-        }
-      }, 1000);
-    }
-
-    function updateUI() {
-      if (completedTasks > totalTasks) completedTasks = totalTasks;
-
-      const percent = Math.round((completedTasks / totalTasks) * 100);
-      document.getElementById('progress-percent').innerText = `${percent}% Server Decrypted`;
-      document.getElementById('task-count').innerText = `${completedTasks} / ${totalTasks} Keys`;
-      document.getElementById('progress-fill').style.width = `${percent}%`;
-
-      const unlockBtn = document.getElementById('unlock-btn');
-      unlockBtn.disabled = false;
-
-      if (completedTasks >= totalTasks) {
-        unlockBtn.classList.add('active');
-        unlockBtn.innerText = `🎉 PLAY FULL VIDEO NOW`;
-      } else {
-        unlockBtn.innerText = stepMessages[completedTasks];
-      }
-    }
-
-    function showShareModal() {
-      document.getElementById('shareModal').style.display = 'flex';
-    }
-
-    function handleModalOkClick() {
-      document.getElementById('shareModal').style.display = 'none';
-      if (tg && tg.openTelegramLink && FINAL_DESTINATION_URL.includes("t.me")) {
-        tg.openTelegramLink(FINAL_DESTINATION_URL);
-      } else {
-        window.location.href = FINAL_DESTINATION_URL;
+      try {
+        const AdController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID, debug: true });
+        
+        statusEl.innerText = "Status: Requesting Ad from Server...";
+        
+        AdController.show()
+          .then((result) => {
+            alert("Success! Ad Played Completely.");
+            statusEl.innerText = "Status: Ad Completed Successfully!";
+          })
+          .catch((error) => {
+            console.log("Adsgram Catch Error:", error);
+            alert("Adsgram Server Response: " + JSON.stringify(error));
+            statusEl.innerText = "Status: Error - " + (error.description || error.error || "No Ads");
+          });
+      } catch (e) {
+        alert("Exception: " + e.message);
       }
     }
   </script>
-
 </body>
 </html>
