@@ -125,7 +125,6 @@
 
         const adBtn = document.getElementById('adBtn');
         const statusBox = document.getElementById('statusBox');
-        let AdController = null;
 
         function showStatus(message, isSuccess) {
             statusBox.style.display = 'block';
@@ -133,41 +132,27 @@
             statusBox.innerText = message;
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-            if (window.Adsgram) {
-                AdController = window.Adsgram.init({ blockId: "43061" });
-            }
-        });
-
-        adBtn.addEventListener('click', () => {
-            if (!AdController && window.Adsgram) {
-                AdController = window.Adsgram.init({ blockId: "43061" });
-            }
-
-            if (!AdController) {
+        adBtn.addEventListener('click', async () => {
+            if (!window.Adsgram) {
                 showStatus("SDK block issue or network delay. Retrying...", false);
                 return;
             }
 
-            adBtn.disabled = true;
-
-            AdController.show().then((result) => {
+            try {
+                adBtn.disabled = true;
+                const AdController = window.Adsgram.init({ blockId: "43061" });
+                
+                const result = await AdController.show();
                 showStatus("Reward Claimed Successfully! 🎉", true);
-                if (tg && tg.HapticFeedback) {
-                    tg.HapticFeedback.notificationOccurred('success');
-                }
-            }).catch((result) => {
+                if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+            } catch (error) {
                 let errorMsg = "No ad available right now or ad closed.";
-                if (result && result.description) {
-                    errorMsg = result.description;
-                }
+                if (error && error.description) errorMsg = error.description;
                 showStatus("Adsgram: " + errorMsg, false);
-                if (tg && tg.HapticFeedback) {
-                    tg.HapticFeedback.notificationOccurred('error');
-                }
-            }).finally(() => {
+                if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+            } finally {
                 adBtn.disabled = false;
-            });
+            }
         });
     </script>
 </body>
