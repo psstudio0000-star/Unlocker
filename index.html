@@ -133,7 +133,6 @@
             statusBox.innerText = message;
         }
 
-        // Initialize Adsgram early on page load
         window.addEventListener('DOMContentLoaded', () => {
             if (window.Adsgram) {
                 AdController = window.Adsgram.init({ blockId: "43061" });
@@ -141,7 +140,6 @@
         });
 
         adBtn.addEventListener('click', () => {
-            // Fallback initialization if DOMContentLoaded was skipped
             if (!AdController && window.Adsgram) {
                 AdController = window.Adsgram.init({ blockId: "43061" });
             }
