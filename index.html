@@ -1,64 +1,169 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>HD Premium Video Player</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script id="adsgram-script" src="https://sad.adsgram.ai/js/sad.min.js"></script>
-
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
-    body { background-color: #090d16; color: #ffffff; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 16px; }
-    .card { background: #121824; border-radius: 20px; padding: 20px; width: 100%; max-width: 360px; text-align: center; border: 1px solid #1e293b; }
-    .btn { width: 100%; padding: 16px; border: none; border-radius: 14px; font-weight: 800; font-size: 0.95rem; cursor: pointer; margin-top: 15px; background: #2563eb; color: #fff; }
-    .status-box { margin-top: 15px; font-size: 13px; color: #94a3b8; background: #0b0f17; padding: 10px; border-radius: 8px; border: 1px solid #1e293b; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Flexbox Sky - Premium App</title>
+    <!-- Telegram WebApp SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Adsgram SDK -->
+    <script src="https://sad.adsgram.ai/js/sad-index.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background-color: var(--tg-theme-bg-color, #0f172a);
+            color: var(--tg-theme-text-color, #f8fafc);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        .icon-box {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            font-size: 28px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        p {
+            font-size: 14px;
+            color: #94a3b8;
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .status-card {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            display: none;
+        }
+        .status-success {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        .status-error {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+    </style>
 </head>
 <body>
 
-  <div class="card">
-    <h2>HD VIDEO UNLOCK</h2>
-    <div id="status" class="status-box">Status: Ready to Test</div>
-    <button id="unlock-btn" class="btn" onclick="triggerAd()">⚡ TEST AD LOAD</button>
-  </div>
-
-  <script>
-    let tg = window.Telegram?.WebApp;
-    if (tg) { tg.ready(); tg.expand(); }
-
-    // 👇 New Block ID set
-    const ADSGRAM_BLOCK_ID = "42965";
-
-    function triggerAd() {
-      const statusEl = document.getElementById('status');
-      statusEl.innerText = "Status: Initializing Adsgram...";
-
-      if (typeof window.Adsgram === "undefined") {
-        alert("Adsgram SDK load nahi hua! Internet/Script Block check karein.");
-        statusEl.innerText = "Status: SDK Script Failed";
-        return;
-      }
-
-      try {
-        const AdController = window.Adsgram.init({ blockId: ADSGRAM_BLOCK_ID, debug: true });
+    <div class="container">
+        <div class="icon-box">⚡</div>
+        <h1>Flexbox Sky</h1>
+        <p>Watch a short video ad to claim your reward or unlock premium content.</p>
         
-        statusEl.innerText = "Status: Requesting Ad from Server...";
-        
-        AdController.show()
-          .then((result) => {
-            alert("Success! Ad Played Completely.");
-            statusEl.innerText = "Status: Ad Completed Successfully!";
-          })
-          .catch((error) => {
-            console.log("Adsgram Catch Error:", error);
-            alert("Adsgram Server Response: " + JSON.stringify(error));
-            statusEl.innerText = "Status: Error - " + (error.description || error.error || "No Ads");
-          });
-      } catch (e) {
-        alert("Exception: " + e.message);
-      }
-    }
-  </script>
+        <button id="adBtn" class="btn">
+            <span>⚡ TEST AD LOAD</span>
+        </button>
+
+        <div id="statusBox" class="status-card"></div>
+    </div>
+
+    <script>
+        // Telegram WebApp Initialization
+        const tg = window.Telegram?.WebApp;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+        }
+
+        // Adsgram Controller Initialization (New Block ID: 43061)
+        const AdController = window.Adsgram ? window.Adsgram.init({ blockId: "43061" }) : null;
+
+        const adBtn = document.getElementById('adBtn');
+        const statusBox = document.getElementById('statusBox');
+
+        function showStatus(message, isSuccess) {
+            statusBox.style.display = 'block';
+            statusBox.className = 'status-card ' + (isSuccess ? 'status-success' : 'status-error');
+            statusBox.innerText = message;
+        }
+
+        adBtn.addEventListener('click', () => {
+            if (!AdController) {
+                showStatus("Adsgram SDK failed to load. Please check connection.", false);
+                return;
+            }
+
+            adBtn.disabled = true;
+
+            AdController.show().then((result) => {
+                // Ad completed successfully
+                showStatus("Reward Claimed Successfully! 🎉", true);
+                if (tg && tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('success');
+                }
+            }).catch((result) => {
+                // Ad failed or closed early
+                let errorMsg = "Ad skipped or failed to load.";
+                if (result && result.description) {
+                    errorMsg = result.description;
+                }
+                showStatus("Error: " + errorMsg, false);
+                if (tg && tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred('error');
+                }
+            }).finally(() => {
+                adBtn.disabled = false;
+            });
+        });
+    </script>
 </body>
 </html>
