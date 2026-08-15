@@ -117,15 +117,11 @@
     </div>
 
     <script>
-        // Telegram WebApp Initialization
         const tg = window.Telegram?.WebApp;
         if (tg) {
             tg.ready();
             tg.expand();
         }
-
-        // Adsgram Controller Initialization (New Block ID: 43061)
-        const AdController = window.Adsgram ? window.Adsgram.init({ blockId: "43061" }) : null;
 
         const adBtn = document.getElementById('adBtn');
         const statusBox = document.getElementById('statusBox');
@@ -137,26 +133,26 @@
         }
 
         adBtn.addEventListener('click', () => {
-            if (!AdController) {
-                showStatus("Adsgram SDK failed to load. Please check connection.", false);
+            // Dynamic SDK Check and Init
+            if (!window.Adsgram) {
+                showStatus("SDK loading... Please wait 3 seconds and click again.", false);
                 return;
             }
 
+            const AdController = window.Adsgram.init({ blockId: "43061" });
             adBtn.disabled = true;
 
             AdController.show().then((result) => {
-                // Ad completed successfully
                 showStatus("Reward Claimed Successfully! 🎉", true);
                 if (tg && tg.HapticFeedback) {
                     tg.HapticFeedback.notificationOccurred('success');
                 }
             }).catch((result) => {
-                // Ad failed or closed early
                 let errorMsg = "Ad skipped or failed to load.";
                 if (result && result.description) {
                     errorMsg = result.description;
                 }
-                showStatus("Error: " + errorMsg, false);
+                showStatus("Adsgram Response: " + errorMsg, false);
                 if (tg && tg.HapticFeedback) {
                     tg.HapticFeedback.notificationOccurred('error');
                 }
