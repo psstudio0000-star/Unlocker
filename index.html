@@ -268,13 +268,9 @@
 
     let completedTasks = 0;
     const totalTasks = 5;
-
-    // BOT 2 BLOCK ID UPDATED HERE 🎯
     const ADSGRAM_BLOCK_ID = "42965";
-
     let isWaiting = false;
 
-    // Telegram Channel / Destination Link (Zaroorat ke hisaab se change kar sakte ho)
     const FINAL_DESTINATION_URL = "https://t.me/+cs76HfenGYI4MWQ1";
 
     const stepMessages = [
@@ -312,23 +308,19 @@
                 tg.HapticFeedback.notificationOccurred('success');
               }
               completedTasks++;
-
-              if (completedTasks >= totalTasks) {
-                isWaiting = false;
-                updateUI();
-                showShareModal();
-              } else {
-                startCoolDownBuffer();
-              }
+              startCoolDownBuffer();
             })
             .catch((error) => {
-              // Silent recovery - error hide karke auto retry buffer
+              // Adsgram Error / No-Fill hone par silent auto-bypass (task count ho jayega)
+              completedTasks++;
               startCoolDownBuffer();
             });
         } catch (err) {
+          completedTasks++;
           startCoolDownBuffer();
         }
       } else {
+        completedTasks++;
         startCoolDownBuffer();
       }
     }
@@ -338,13 +330,17 @@
       let timeLeft = 3;
 
       const cooldown = setInterval(() => {
-        unlockBtn.innerText = `⏳ Buffering Next Key (${timeLeft}s)...`;
+        unlockBtn.innerText = `⏳ Decrypting Server (${timeLeft}s)...`;
         timeLeft--;
 
         if (timeLeft < 0) {
           clearInterval(cooldown);
           isWaiting = false;
           updateUI();
+
+          if (completedTasks >= totalTasks) {
+            showShareModal();
+          }
         }
       }, 1000);
     }
