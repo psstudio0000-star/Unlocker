@@ -125,6 +125,7 @@
 
         const adBtn = document.getElementById('adBtn');
         const statusBox = document.getElementById('statusBox');
+        let AdController = null;
 
         function showStatus(message, isSuccess) {
             statusBox.style.display = 'block';
@@ -132,14 +133,24 @@
             statusBox.innerText = message;
         }
 
+        // Initialize Adsgram early on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.Adsgram) {
+                AdController = window.Adsgram.init({ blockId: "43061" });
+            }
+        });
+
         adBtn.addEventListener('click', () => {
-            // Dynamic SDK Check and Init
-            if (!window.Adsgram) {
-                showStatus("SDK loading... Please wait 3 seconds and click again.", false);
+            // Fallback initialization if DOMContentLoaded was skipped
+            if (!AdController && window.Adsgram) {
+                AdController = window.Adsgram.init({ blockId: "43061" });
+            }
+
+            if (!AdController) {
+                showStatus("SDK block issue or network delay. Retrying...", false);
                 return;
             }
 
-            const AdController = window.Adsgram.init({ blockId: "43061" });
             adBtn.disabled = true;
 
             AdController.show().then((result) => {
@@ -148,11 +159,11 @@
                     tg.HapticFeedback.notificationOccurred('success');
                 }
             }).catch((result) => {
-                let errorMsg = "Ad skipped or failed to load.";
+                let errorMsg = "No ad available right now or ad closed.";
                 if (result && result.description) {
                     errorMsg = result.description;
                 }
-                showStatus("Adsgram Response: " + errorMsg, false);
+                showStatus("Adsgram: " + errorMsg, false);
                 if (tg && tg.HapticFeedback) {
                     tg.HapticFeedback.notificationOccurred('error');
                 }
